@@ -1,0 +1,2434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BuildPro - Real Estate Project Management</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#0f2347',
+              navyDark: '#0a172c',
+              navyLight: '#162e5b',
+              blue: '#1b68ea',
+              blueHover: '#1555c2',
+              accent: '#38bdf8',
+              slateBg: '#f4f7fb',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- React and ReactDOM -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Babel Standalone for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #f4f7fb;
+      color: #1e293b;
+    }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 antialiased selection:bg-blue-500 selection:text-white">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useRef } = React;
+
+    // --- INITIAL MOCK DATA MATCHING EXACT SPECIFICATIONS & UI IMAGE ---
+    const initialProjects = [
+      {
+        id: 1,
+        name: "Skyline Residency",
+        location: "Coimbatore",
+        type: "Residential",
+        description: "Luxury residential towers featuring 48 premium 3-BHK & 4-BHK apartments with modern amenities, smart home automation, and infinity rooftop pool.",
+        status: "In Progress",
+        statusDisplay: "On Track",
+        progress: 72,
+        budget: 4500000,
+        spent: 3240000,
+        startDate: "2026-01-15",
+        endDate: "2027-04-30",
+        manager: "Irfan S",
+        featuredImage: "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80",
+        siteImage: "https://images.unsplash.com/photo-1541888946425-d0fbb186f5f7?auto=format&fit=crop&w=800&q=80",
+        latestSiteUpdate: "Nov 20, 2026",
+        unitsCount: 48,
+        unitsSold: 28,
+        unitsBooked: 8,
+        unitsAvailable: 12
+      },
+      {
+        id: 2,
+        name: "Green Valley Villas",
+        location: "Bangalore",
+        type: "Residential",
+        description: "Eco-luxury villa community with private landscaped gardens, solar energy integration, and clubhouse.",
+        status: "In Progress",
+        statusDisplay: "On Track",
+        progress: 45,
+        budget: 6200000,
+        spent: 2790000,
+        startDate: "2026-03-01",
+        endDate: "2027-08-15",
+        manager: "Sarah Chen",
+        featuredImage: "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80",
+        siteImage: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=800&q=80",
+        latestSiteUpdate: "Nov 18, 2026",
+        unitsCount: 32,
+        unitsSold: 14,
+        unitsBooked: 6,
+        unitsAvailable: 12
+      },
+      {
+        id: 3,
+        name: "Metro Business Park",
+        location: "Chennai",
+        type: "Commercial",
+        description: "Grade-A IT park and corporate office towers near major transport corridors and metro transit.",
+        status: "On Hold",
+        statusDisplay: "Delayed",
+        progress: 28,
+        budget: 8500000,
+        spent: 2380000,
+        startDate: "2025-09-01",
+        endDate: "2027-02-28",
+        manager: "Sarah Chen",
+        featuredImage: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80",
+        siteImage: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=800&q=80",
+        latestSiteUpdate: "Nov 15, 2026",
+        unitsCount: 60,
+        unitsSold: 18,
+        unitsBooked: 5,
+        unitsAvailable: 37
+      },
+      {
+        id: 4,
+        name: "Ocean Crest Luxury Suites",
+        location: "Kochi",
+        type: "Residential",
+        description: "Boutique waterfront condominiums with uninterrupted sea views and concierge services.",
+        status: "Completed",
+        statusDisplay: "Completed",
+        progress: 100,
+        budget: 3800000,
+        spent: 3750000,
+        startDate: "2025-01-10",
+        endDate: "2026-10-31",
+        manager: "Irfan S",
+        featuredImage: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+        siteImage: "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=800&q=80",
+        latestSiteUpdate: "Nov 01, 2026",
+        unitsCount: 24,
+        unitsSold: 24,
+        unitsBooked: 0,
+        unitsAvailable: 0
+      }
+    ];
+
+    const initialTasks = [
+      { id: 1, projectId: 1, title: "Review site photos", priority: "High", dueDate: "Nov 22", fullDate: "2026-11-22", completed: false, assignee: "Rajesh Kumar", milestone: "Foundation Completion" },
+      { id: 2, projectId: 1, title: "Approve blueprints", priority: "Medium", dueDate: "Nov 23", fullDate: "2026-11-23", completed: false, assignee: "Sarah Chen", milestone: "Foundation Completion" },
+      { id: 3, projectId: 1, title: "Check material delivery", priority: "Low", dueDate: "Nov 24", fullDate: "2026-11-24", completed: false, assignee: "Rajesh Kumar", milestone: "Structure Ready" },
+      { id: 4, projectId: 1, title: "Update project report", priority: "Low", dueDate: "Nov 25", fullDate: "2026-11-25", completed: false, assignee: "Irfan S", milestone: "Foundation Completion" },
+      { id: 5, projectId: 2, title: "Soil compaction inspection", priority: "High", dueDate: "Nov 28", fullDate: "2026-11-28", completed: false, assignee: "Sarah Chen", milestone: "Villa Phase 1" },
+      { id: 6, projectId: 1, title: "Subcontractor safety briefing", priority: "Medium", dueDate: "Nov 29", fullDate: "2026-11-29", completed: true, assignee: "Rajesh Kumar", milestone: "Foundation Completion" }
+    ];
+
+    const initialMilestones = [
+      { id: 1, projectId: 1, title: "Foundation Completion", dueDate: "Nov 25, 2026", status: "In Progress", active: true },
+      { id: 2, projectId: 1, title: "Structure Ready", dueDate: "Dec 10, 2026", status: "Pending", active: false },
+      { id: 3, projectId: 1, title: "Hand Over", dueDate: "Mar 15, 2027", status: "Pending", active: false }
+    ];
+
+    const initialUnits = [
+      { id: 101, projectId: 1, projectName: "Skyline Residency", unitNo: "A-101", type: "Flat", area: 1850, floor: 1, price: 145000, status: "Available", bhk: "3 BHK", facing: "East" },
+      { id: 102, projectId: 1, projectName: "Skyline Residency", unitNo: "A-102", type: "Flat", area: 1920, floor: 1, price: 152000, status: "Booked", bhk: "3 BHK", facing: "North", bookedBy: "Karthik Narayanan" },
+      { id: 103, projectId: 1, projectName: "Skyline Residency", unitNo: "A-201", type: "Flat", area: 2200, floor: 2, price: 178000, status: "Available", bhk: "4 BHK", facing: "East" },
+      { id: 104, projectId: 1, projectName: "Skyline Residency", unitNo: "A-202", type: "Flat", area: 2200, floor: 2, price: 178000, status: "Sold", bhk: "4 BHK", facing: "West", bookedBy: "Vikramaditya Rao" },
+      { id: 105, projectId: 1, projectName: "Skyline Residency", unitNo: "B-301", type: "Flat", area: 2450, floor: 3, price: 198000, status: "Available", bhk: "4 BHK Penthouse", facing: "North-East" },
+      { id: 106, projectId: 1, projectName: "Skyline Residency", unitNo: "B-302", type: "Flat", area: 1850, floor: 3, price: 148000, status: "Reserved", bhk: "3 BHK", facing: "South" },
+      { id: 201, projectId: 2, projectName: "Green Valley Villas", unitNo: "V-01", type: "Villa", area: 3200, floor: 2, price: 285000, status: "Available", bhk: "4 BHK Villa", facing: "East" },
+      { id: 202, projectId: 2, projectName: "Green Valley Villas", unitNo: "V-02", type: "Villa", area: 3400, floor: 2, price: 310000, status: "Booked", bhk: "4 BHK Villa", facing: "North", bookedBy: "Ananya Deshmukh" },
+      { id: 301, projectId: 3, projectName: "Metro Business Park", unitNo: "OFF-401", type: "Shop", area: 1250, floor: 4, price: 195000, status: "Available", bhk: "Office Space", facing: "North" }
+    ];
+
+    const initialClients = [
+      { id: 1, name: "Vikramaditya Rao", phone: "+91 99887 76655", email: "vikram.rao@example.com", status: "Converted", source: "Website", budget: "$170k - $200k", assignedTo: "Marcus Vance", notes: "Bought Unit A-202. First payment completed.", nextFollowUp: "2026-11-30" },
+      { id: 2, name: "Ananya Deshmukh", phone: "+91 91234 56789", email: "ananya.d@example.com", status: "Site Visit", source: "Referral", budget: "$140k - $160k", assignedTo: "Marcus Vance", notes: "Very interested in Skyline 3BHK East-facing units. Scheduled site walkthrough.", nextFollowUp: "2026-11-23" },
+      { id: 3, name: "Karthik Narayanan", phone: "+91 98450 12345", email: "karthik.n@example.com", status: "Converted", source: "Walk-in", budget: "$150k - $180k", assignedTo: "Marcus Vance", notes: "Booked Unit A-102. Token payment verified.", nextFollowUp: "2026-12-05" },
+      { id: 4, name: "Priya Sundaram", phone: "+91 94432 10987", email: "priya.s@example.com", status: "Negotiation", source: "Social Media", budget: "$180k - $210k", assignedTo: "Marcus Vance", notes: "Negotiating floor discounts on Penthouse B-301.", nextFollowUp: "2026-11-22" },
+      { id: 5, name: "Rohan Varma", phone: "+91 97890 23456", email: "rohan.v@example.com", status: "New", source: "Website", budget: "$130k - $150k", assignedTo: "Marcus Vance", notes: "Inquired via online contact form regarding 3 BHK flats.", nextFollowUp: "2026-11-21" }
+    ];
+
+    const initialBudgetCategories = [
+      { id: 1, projectId: 1, name: "Civil & Structural", allocated: 2200000, spent: 1750000 },
+      { id: 2, projectId: 1, name: "Mechanical & Electrical", allocated: 950000, spent: 620000 },
+      { id: 3, projectId: 1, name: "Finishes & Interiors", allocated: 850000, spent: 540000 },
+      { id: 4, projectId: 1, name: "Permits & Approvals", allocated: 250000, spent: 230000 },
+      { id: 5, projectId: 1, name: "Marketing & Sales", allocated: 250000, spent: 100000 }
+    ];
+
+    const initialExpenses = [
+      { id: 1, projectId: 1, category: "Civil & Structural", vendor: "UltraTech Cement Ltd", amount: 145000, date: "2026-11-10", desc: "500 Bags of Grade 53 cement for 4th floor casting", ref: "INV-2026-881" },
+      { id: 2, projectId: 1, category: "Civil & Structural", vendor: "Tata Steel Solutions", amount: 280000, date: "2026-11-14", desc: "Fe 550D TMT rebar consignment batch #4", ref: "INV-2026-902" },
+      { id: 3, projectId: 1, category: "Mechanical & Electrical", vendor: "Havells Infrastructure", amount: 75000, date: "2026-11-18", desc: "Armored underground cabling & conduit piping", ref: "INV-2026-940" }
+    ];
+
+    const initialDocuments = [
+      { id: 1, projectId: 1, title: "Approved Architectural Floor Plans (Rev 3)", category: "Plan", size: "4.2 MB", ext: "pdf", date: "2026-02-10", uploader: "Irfan S" },
+      { id: 2, projectId: 1, title: "Municipal Building Sanction Certificate", category: "Approval", size: "1.8 MB", ext: "pdf", date: "2026-01-20", uploader: "Irfan S" },
+      { id: 3, projectId: 1, title: "Fire Safety & Environmental Clearance NOC", category: "Approval", size: "2.4 MB", ext: "pdf", date: "2026-03-05", uploader: "Sarah Chen" },
+      { id: 4, projectId: 1, title: "Standard Sale & Construction Agreement Draft", category: "Agreement", size: "850 KB", ext: "docx", date: "2026-04-12", uploader: "Marcus Vance" }
+    ];
+
+    // --- MAIN APP COMPONENT ---
+    function App() {
+      // Global state
+      const [currentRoute, setCurrentRoute] = useState('dashboard'); // 'dashboard', 'projects', 'project-details', 'units', 'clients', 'reports', 'schedule', 'team', 'settings'
+      const [activeProjectId, setActiveProjectId] = useState(1);
+      const [projects, setProjects] = useState(initialProjects);
+      const [tasks, setTasks] = useState(initialTasks);
+      const [milestones, setMilestones] = useState(initialMilestones);
+      const [units, setUnits] = useState(initialUnits);
+      const [clients, setClients] = useState(initialClients);
+      const [budgetCategories, setBudgetCategories] = useState(initialBudgetCategories);
+      const [expenses, setExpenses] = useState(initialExpenses);
+      const [documents, setDocuments] = useState(initialDocuments);
+      const [searchQuery, setSearchQuery] = useState('');
+      const [activeUserRole, setActiveUserRole] = useState('Admin'); // Admin, Project Manager, Sales Executive, Site Engineer
+      
+      // Modals
+      const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+      const [showBookingModal, setShowBookingModal] = useState(false);
+      const [bookingUnitTarget, setBookingUnitTarget] = useState(null);
+      const [showNewTaskModal, setShowNewTaskModal] = useState(false);
+      const [showNotifications, setShowNotifications] = useState(false);
+      const [showSiteProgressModal, setShowSiteProgressModal] = useState(false);
+      const [sitePhotoCategory, setSitePhotoCategory] = useState('all');
+
+      // Notifications list
+      const notifications = [
+        { id: 1, title: "Concrete Pouring Complete", time: "10 mins ago", unread: true },
+        { id: 2, title: "New Unit Booking for A-102", time: "1 hour ago", unread: true },
+        { id: 3, title: "Safety Inspection Passed", time: "3 hours ago", unread: true }
+      ];
+
+      // Current active project details
+      const activeProject = useMemo(() => {
+        return projects.find(p => p.id === activeProjectId) || projects[0];
+      }, [projects, activeProjectId]);
+
+      // Overall metrics calculated dynamically
+      const stats = useMemo(() => {
+        const total = projects.length;
+        const onTrack = projects.filter(p => p.status === 'In Progress').length;
+        const delayed = projects.filter(p => p.status === 'On Hold').length;
+        const completed = projects.filter(p => p.status === 'Completed').length;
+        return { total, onTrack, delayed, completed };
+      }, [projects]);
+
+      // Toggle task complete status
+      const toggleTask = (taskId) => {
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, completed: !t.completed } : t));
+      };
+
+      // Add a new project
+      const handleAddProject = (newProj) => {
+        const id = projects.length + 1;
+        const projectObj = {
+          id,
+          name: newProj.name,
+          location: newProj.location,
+          type: newProj.type || "Residential",
+          description: newProj.description || "",
+          status: "In Progress",
+          statusDisplay: "On Track",
+          progress: 0,
+          budget: parseFloat(newProj.budget) || 1000000,
+          spent: 0,
+          startDate: newProj.startDate || "2026-11-20",
+          endDate: newProj.endDate || "2027-11-20",
+          manager: activeUserRole === 'Admin' ? 'Irfan S' : 'Sarah Chen',
+          featuredImage: newProj.image || "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=80",
+          siteImage: "https://images.unsplash.com/photo-1541888946425-d0fbb186f5f7?auto=format&fit=crop&w=800&q=80",
+          latestSiteUpdate: "Nov 20, 2026",
+          unitsCount: parseInt(newProj.unitsCount) || 20,
+          unitsSold: 0,
+          unitsBooked: 0,
+          unitsAvailable: parseInt(newProj.unitsCount) || 20
+        };
+        setProjects([projectObj, ...projects]);
+        setShowNewProjectModal(false);
+      };
+
+      // Handle Unit Booking (FR-CLT-04 & FR-CLT-05 & FR-UNT-05)
+      const handleCreateBooking = (bookingData) => {
+        const unitId = parseInt(bookingData.unitId);
+        const clientId = parseInt(bookingData.clientId);
+
+        // Update Unit status to 'Booked'
+        setUnits(prev => prev.map(u => {
+          if (u.id === unitId) {
+            return { ...u, status: 'Booked', bookedBy: bookingData.clientName };
+          }
+          return u;
+        }));
+
+        // Update Client status to 'Converted'
+        setClients(prev => prev.map(c => {
+          if (c.id === clientId) {
+            return { ...c, status: 'Converted', notes: `${c.notes} | Booked unit with deposit $${bookingData.amount}` };
+          }
+          return c;
+        }));
+
+        setShowBookingModal(false);
+        setBookingUnitTarget(null);
+      };
+
+      return (
+        <div className="flex min-h-screen bg-[#f4f7fb]">
+          {/* ================= LEFT SIDEBAR ================= */}
+          <aside className="w-64 bg-brand-navy flex flex-col justify-between shrink-0 fixed inset-y-0 left-0 z-30 shadow-xl select-none">
+            <div>
+              {/* Brand Header */}
+              <div className="p-6 pb-5 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="4" y="2" width="7" height="20" rx="1"></rect>
+                    <path d="M11 6h7a2 2 0 0 1 2 2v14h-9"></path>
+                    <path d="M7 6v.01"></path>
+                    <path d="M7 10v.01"></path>
+                    <path d="M7 14v.01"></path>
+                    <path d="M7 18v.01"></path>
+                    <path d="M15 10v.01"></path>
+                    <path d="M15 14v.01"></path>
+                    <path d="M15 18v.01"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-1.5">
+                    BuildPro
+                  </h1>
+                  <p className="text-xs text-slate-400 font-medium tracking-wide">Real Estate Projects</p>
+                </div>
+              </div>
+
+              {/* Navigation Items */}
+              <nav className="px-4 py-2 space-y-1.5">
+                {[
+                  { id: 'dashboard', label: 'Dashboard', icon: 'grid' },
+                  { id: 'projects', label: 'Projects', icon: 'folder' },
+                  { id: 'tasks', label: 'Tasks', icon: 'check-square' },
+                  { id: 'schedule', label: 'Schedule', icon: 'calendar' },
+                  { id: 'team', label: 'Team', icon: 'users' },
+                  { id: 'reports', label: 'Reports', icon: 'bar-chart' },
+                  { id: 'settings', label: 'Settings', icon: 'settings' }
+                ].map((item) => {
+                  const isActive = currentRoute === item.id || (item.id === 'projects' && currentRoute === 'project-details');
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setCurrentRoute(item.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 text-left ${
+                        isActive
+                          ? 'bg-brand-blue text-white shadow-md shadow-blue-600/30 font-bold'
+                          : 'text-slate-300 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      {/* Nav Icons */}
+                      {item.icon === 'grid' && (
+                        <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                          <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                          <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                          <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                        </svg>
+                      )}
+                      {item.icon === 'folder' && (
+                        <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                        </svg>
+                      )}
+                      {item.icon === 'check-square' && (
+                        <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <polyline points="9 11 12 14 22 4"></polyline>
+                          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+                        </svg>
+                      )}
+                      {item.icon === 'calendar' && (
+                        <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                          <line x1="16" y1="2" x2="16" y2="6"></line>
+                          <line x1="8" y1="2" x2="8" y2="6"></line>
+                          <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                      )}
+                      {item.icon === 'users' && (
+                        <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"></path>
+                          <circle cx="9" cy="7" r="4"></circle>
+                          <path d="M23 21v-2a4 4 0 00-3-3.87"></path>
+                          <path d="M16 3.13a4 4 0 010 7.75"></path>
+                        </svg>
+                      )}
+                      {item.icon === 'bar-chart' && (
+                        <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <line x1="18" y1="20" x2="18" y2="10"></line>
+                          <line x1="12" y1="20" x2="12" y2="4"></line>
+                          <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                      )}
+                      {item.icon === 'settings' && (
+                        <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                          <circle cx="12" cy="12" r="3"></circle>
+                          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path>
+                        </svg>
+                      )}
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+
+              {/* Sub-modules from SRS */}
+              <div className="px-6 pt-4 pb-2">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Inventory & Leads</p>
+              </div>
+              <div className="px-4 space-y-1">
+                <button
+                  onClick={() => setCurrentRoute('units')}
+                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                    currentRoute === 'units' ? 'bg-brand-blue text-white' : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span className="flex items-center gap-2.5">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                    </svg>
+                    Units & Inventory
+                  </span>
+                  <span className="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded-full">{units.length}</span>
+                </button>
+
+                <button
+                  onClick={() => setCurrentRoute('clients')}
+                  className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                    currentRoute === 'clients' ? 'bg-brand-blue text-white' : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span className="flex items-center gap-2.5">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                    Clients & Leads
+                  </span>
+                  <span className="bg-emerald-950 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full">{clients.length}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Bottom Card: "Building Better Tomorrows" matching screenshot */}
+            <div className="p-4">
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#112952] to-[#0a172c] border border-blue-900/40 p-5 text-center shadow-lg">
+                <div className="mx-auto w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-400/20 flex items-center justify-center text-blue-400 mb-2.5">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                  </svg>
+                </div>
+                <h4 className="text-white text-xs font-bold tracking-wide">Building</h4>
+                <p className="text-slate-300 text-xs font-semibold">Better Tomorrows</p>
+                {/* City skyline illustration */}
+                <div className="mt-4 pt-2 opacity-30 flex justify-center gap-1.5 items-end">
+                  <div className="w-2 h-6 bg-blue-300 rounded-t-sm"></div>
+                  <div className="w-3 h-10 bg-blue-300 rounded-t-sm"></div>
+                  <div className="w-2.5 h-7 bg-blue-300 rounded-t-sm"></div>
+                  <div className="w-3.5 h-12 bg-blue-300 rounded-t-sm"></div>
+                  <div className="w-2 h-5 bg-blue-300 rounded-t-sm"></div>
+                  <div className="w-3 h-9 bg-blue-300 rounded-t-sm"></div>
+                  <div className="w-2 h-6 bg-blue-300 rounded-t-sm"></div>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          {/* ================= MAIN CONTENT WRAPPER ================= */}
+          <div className="flex-1 ml-64 flex flex-col min-h-screen">
+            
+            {/* ================= TOP HEADER BAR ================= */}
+            <header className="h-16 bg-white border-b border-slate-200/80 px-8 flex items-center justify-between sticky top-0 z-20 shadow-xs">
+              {/* Search Bar */}
+              <div className="relative w-96">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                </span>
+                <input
+                  type="text"
+                  placeholder="Search projects, tasks..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-slate-100/80 hover:bg-slate-100 text-slate-800 text-sm placeholder-slate-400 pl-10 pr-4 py-2 rounded-xl border border-transparent focus:border-blue-400 focus:bg-white focus:outline-none transition-all"
+                />
+              </div>
+
+              {/* Header Right: Role Switcher, Notifications & Profile */}
+              <div className="flex items-center gap-5">
+                {/* Role Switcher for RBAC Testing (FR-AUTH-05) */}
+                <div className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 text-xs text-slate-600">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase">Role:</span>
+                  <select
+                    value={activeUserRole}
+                    onChange={(e) => setActiveUserRole(e.target.value)}
+                    className="bg-transparent font-semibold text-slate-700 outline-none cursor-pointer"
+                  >
+                    <option value="Admin">Admin (Full Access)</option>
+                    <option value="Project Manager">Project Manager</option>
+                    <option value="Sales Executive">Sales Executive</option>
+                    <option value="Site Engineer">Site Engineer</option>
+                  </select>
+                </div>
+
+                {/* Notifications Button */}
+                <div className="relative">
+                  <button
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    className="relative p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                    </svg>
+                    {/* Badge "3" */}
+                    <span className="absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white shadow-xs">
+                      3
+                    </span>
+                  </button>
+
+                  {/* Notifications Popover */}
+                  {showNotifications && (
+                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-50">
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <h4 className="font-bold text-sm text-slate-800">Notifications</h4>
+                        <span className="text-xs bg-rose-50 text-rose-600 font-bold px-2 py-0.5 rounded-full">3 New</span>
+                      </div>
+                      <div className="divide-y divide-slate-100 max-h-64 overflow-y-auto mt-2">
+                        {notifications.map(n => (
+                          <div key={n.id} className="py-2.5 px-1 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer">
+                            <p className="text-xs font-semibold text-slate-800">{n.title}</p>
+                            <span className="text-[11px] text-slate-400">{n.time}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Profile Widget matching UI screenshot: Irfan S */}
+                <div className="flex items-center gap-3 pl-3 border-l border-slate-200">
+                  <img
+                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
+                    alt="Irfan S"
+                    className="w-9 h-9 rounded-full object-cover ring-2 ring-blue-500/20"
+                  />
+                  <div className="flex items-center gap-1.5 cursor-pointer">
+                    <span className="text-sm font-bold text-slate-800">Irfan S</span>
+                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </header>
+
+            {/* ================= PAGE CONTENT ================= */}
+            <main className="flex-1 p-8 overflow-y-auto">
+              
+              {/* PAGE ROUTING */}
+              {currentRoute === 'dashboard' && (
+                <DashboardView
+                  projects={projects}
+                  tasks={tasks}
+                  milestones={milestones}
+                  stats={stats}
+                  onToggleTask={toggleTask}
+                  onOpenNewProject={() => setShowNewProjectModal(true)}
+                  onViewProjectDetails={(id) => {
+                    setActiveProjectId(id);
+                    setCurrentRoute('project-details');
+                  }}
+                  onViewSiteProgress={() => setShowSiteProgressModal(true)}
+                  setCurrentRoute={setCurrentRoute}
+                />
+              )}
+
+              {currentRoute === 'projects' && (
+                <ProjectsListView
+                  projects={projects}
+                  onOpenNewProject={() => setShowNewProjectModal(true)}
+                  onSelectProject={(id) => {
+                    setActiveProjectId(id);
+                    setCurrentRoute('project-details');
+                  }}
+                />
+              )}
+
+              {currentRoute === 'project-details' && (
+                <ProjectDetailsView
+                  project={activeProject}
+                  tasks={tasks.filter(t => t.projectId === activeProject.id)}
+                  milestones={milestones.filter(m => m.projectId === activeProject.id)}
+                  units={units.filter(u => u.projectId === activeProject.id)}
+                  budgetCategories={budgetCategories.filter(b => b.projectId === activeProject.id)}
+                  expenses={expenses.filter(e => e.projectId === activeProject.id)}
+                  documents={documents.filter(d => d.projectId === activeProject.id)}
+                  onToggleTask={toggleTask}
+                  onOpenBooking={(unit) => {
+                    setBookingUnitTarget(unit);
+                    setShowBookingModal(true);
+                  }}
+                  onBack={() => setCurrentRoute('projects')}
+                />
+              )}
+
+              {currentRoute === 'units' && (
+                <UnitsInventoryView
+                  units={units}
+                  projects={projects}
+                  onOpenBooking={(unit) => {
+                    setBookingUnitTarget(unit);
+                    setShowBookingModal(true);
+                  }}
+                />
+              )}
+
+              {currentRoute === 'clients' && (
+                <ClientsLeadsView
+                  clients={clients}
+                  units={units}
+                  onOpenBookingWithClient={(client) => {
+                    setBookingUnitTarget(null);
+                    setShowBookingModal(true);
+                  }}
+                />
+              )}
+
+              {currentRoute === 'reports' && (
+                <ReportsView
+                  projects={projects}
+                  units={units}
+                  clients={clients}
+                  expenses={expenses}
+                  budgetCategories={budgetCategories}
+                />
+              )}
+
+              {currentRoute === 'schedule' && (
+                <ScheduleView milestones={milestones} tasks={tasks} />
+              )}
+
+              {currentRoute === 'team' && (
+                <TeamView />
+              )}
+
+              {currentRoute === 'settings' && (
+                <SettingsView />
+              )}
+            </main>
+          </div>
+
+          {/* ================= MODALS ================= */}
+          {/* New Project Modal */}
+          {showNewProjectModal && (
+            <NewProjectModal
+              onClose={() => setShowNewProjectModal(false)}
+              onSubmit={handleAddProject}
+            />
+          )}
+
+          {/* Booking Modal (FR-CLT-04 & FR-UNT-05) */}
+          {showBookingModal && (
+            <BookingModal
+              targetUnit={bookingUnitTarget}
+              availableUnits={units.filter(u => u.status === 'Available')}
+              clients={clients}
+              onClose={() => {
+                setShowBookingModal(false);
+                setBookingUnitTarget(null);
+              }}
+              onSubmit={handleCreateBooking}
+            />
+          )}
+
+          {/* Site Progress Gallery Modal */}
+          {showSiteProgressModal && (
+            <SiteProgressModal
+              project={activeProject}
+              onClose={() => setShowSiteProgressModal(false)}
+            />
+          )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 1. DASHBOARD VIEW (MATCHES UI IMAGE EXACTLY)
+    // ==========================================
+    function DashboardView({ projects, tasks, milestones, stats, onToggleTask, onOpenNewProject, onViewProjectDetails, onViewSiteProgress, setCurrentRoute }) {
+      const skylineResidency = projects.find(p => p.id === 1) || projects[0];
+
+      return (
+        <div className="space-y-6 max-w-7xl mx-auto">
+          {/* Page Title & Main Action Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Real Estate Project Management</h2>
+              <p className="text-sm font-semibold text-slate-500 mt-0.5 flex items-center gap-2">
+                <span>Plan</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                <span>Track</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                <span>Deliver</span>
+              </p>
+            </div>
+            
+            <button
+              onClick={onOpenNewProject}
+              className="bg-brand-blue hover:bg-brand-blueHover text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-blue-500/25 flex items-center gap-2 transition-all transform active:scale-95"
+            >
+              <svg className="w-4 h-4 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>New Project</span>
+            </button>
+          </div>
+
+          {/* 4 Summary Cards (Total Projects, On Track, Delayed, Completed) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {/* 1. Total Projects */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
+              <div className="w-13 h-13 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center p-3">
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                  <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                </svg>
+              </div>
+              <div>
+                <p className="text-3xl font-extrabold text-slate-900 leading-none">{stats.total}</p>
+                <p className="text-xs font-semibold text-slate-500 mt-1">Total Projects</p>
+              </div>
+            </div>
+
+            {/* 2. On Track */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
+              <div className="w-13 h-13 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center p-3">
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <p className="text-3xl font-extrabold text-slate-900 leading-none">{stats.onTrack}</p>
+                <p className="text-xs font-semibold text-slate-500 mt-1">On Track</p>
+              </div>
+            </div>
+
+            {/* 3. Delayed */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
+              <div className="w-13 h-13 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center p-3">
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+              <div>
+                <p className="text-3xl font-extrabold text-slate-900 leading-none">{stats.delayed}</p>
+                <p className="text-xs font-semibold text-slate-500 mt-1">Delayed</p>
+              </div>
+            </div>
+
+            {/* 4. Completed */}
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-4">
+              <div className="w-13 h-13 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center p-3">
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                  <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+              </div>
+              <div>
+                <p className="text-3xl font-extrabold text-slate-900 leading-none">{stats.completed}</p>
+                <p className="text-xs font-semibold text-slate-500 mt-1">Completed</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Middle Row: Featured Project Card & Project Progress Donut */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            {/* Featured Showcase Project: Skyline Residency (lg:col-span-8) */}
+            <div className="lg:col-span-8 relative rounded-3xl overflow-hidden shadow-lg border border-slate-800/10 min-h-[340px] flex flex-col justify-between p-7 bg-slate-900 text-white group">
+              {/* Background Luxury Building Image */}
+              <img
+                src={skylineResidency.featuredImage}
+                alt={skylineResidency.name}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              {/* Dark Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-900/60 to-slate-900/80"></div>
+
+              {/* Card Top: Title, Location & Status Badge */}
+              <div className="relative z-10 flex items-start justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold tracking-tight text-white drop-shadow-sm">
+                    {skylineResidency.name}
+                  </h3>
+                  <p className="text-xs font-medium text-slate-200 mt-1 flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span>{skylineResidency.location}</span>
+                  </p>
+                </div>
+
+                {/* Status Badge */}
+                <div className="bg-emerald-500/90 hover:bg-emerald-500 text-white px-3.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm backdrop-blur-xs">
+                  <span className="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                  <span>On Track</span>
+                </div>
+              </div>
+
+              {/* Card Bottom: Construction Progress & View Details */}
+              <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-8">
+                <div>
+                  <p className="text-xs font-semibold text-slate-300">Construction Progress</p>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-3xl font-extrabold text-white">72%</span>
+                    {/* Sleek Progress Bar matching UI screenshot */}
+                    <div className="w-56 sm:w-72 bg-slate-700/80 rounded-full h-2.5 overflow-hidden backdrop-blur-xs">
+                      <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: '72%' }}></div>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => onViewProjectDetails(skylineResidency.id)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-slate-900/60 hover:bg-slate-900/90 border border-white/30 backdrop-blur-md transition-all self-start sm:self-auto"
+                >
+                  <span>View Details</span>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Project Progress Donut Card (lg:col-span-4) */}
+            <div className="lg:col-span-4 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+              {/* Header */}
+              <div className="flex items-center gap-2 pb-2">
+                <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="18" y1="20" x2="18" y2="10"></line>
+                  <line x1="12" y1="20" x2="12" y2="4"></line>
+                  <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+                <h3 className="font-extrabold text-base text-slate-900">Project Progress</h3>
+              </div>
+
+              {/* Chart & Legend container matching UI screenshot */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-6 py-4">
+                
+                {/* Donut SVG */}
+                <div className="relative w-36 h-36 shrink-0 flex items-center justify-center">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    {/* Background Ring */}
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#f1f5f9" strokeWidth="12" />
+                    
+                    {/* Segment 1: Completed 72% (Blue #1d68ed) */}
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="38"
+                      fill="transparent"
+                      stroke="#1d68ed"
+                      strokeWidth="12"
+                      strokeDasharray="238.76"
+                      strokeDashoffset={238.76 * (1 - 0.72)}
+                      strokeLinecap="round"
+                    />
+
+                    {/* Segment 2: In Progress 18% (Light Sky Blue #38bdf8) */}
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="38"
+                      fill="transparent"
+                      stroke="#38bdf8"
+                      strokeWidth="12"
+                      strokeDasharray="238.76"
+                      strokeDashoffset={238.76 * (1 - 0.18)}
+                      transform="rotate(259.2 50 50)"
+                    />
+                  </svg>
+
+                  {/* Centered Progress Text */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <span className="text-2xl font-extrabold text-slate-900 leading-tight">72%</span>
+                    <span className="text-[10px] font-semibold text-slate-400">Overall<br/>Progress</span>
+                  </div>
+                </div>
+
+                {/* Legend matching UI screenshot */}
+                <div className="space-y-3.5 w-full sm:w-auto">
+                  <div className="flex items-center justify-between gap-6 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
+                      <span className="font-semibold text-slate-700">Completed</span>
+                    </div>
+                    <span className="font-bold text-slate-900">72%</span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-6 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+                      <span className="font-semibold text-slate-700">In Progress</span>
+                    </div>
+                    <span className="font-bold text-slate-900">18%</span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-6 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+                      <span className="font-semibold text-slate-700">Not Started</span>
+                    </div>
+                    <span className="font-bold text-slate-900">10%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <span>Total Work Milestones: 12</span>
+                <span className="font-semibold text-emerald-600">Ahead of Schedule</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom 3 Cards (My Tasks, Site Progress, Upcoming Milestones) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* 1. My Tasks */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                {/* Header */}
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <polyline points="9 11 12 14 22 4"></polyline>
+                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+                      </svg>
+                    </span>
+                    <h3 className="font-extrabold text-base text-slate-900">My Tasks</h3>
+                  </div>
+                  <button
+                    onClick={() => setCurrentRoute('tasks')}
+                    className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  >
+                    View All →
+                  </button>
+                </div>
+
+                {/* Tasks List matching UI screenshot */}
+                <div className="space-y-3 mt-4">
+                  {tasks.slice(0, 4).map(t => (
+                    <div
+                      key={t.id}
+                      className="flex items-center justify-between gap-3 text-xs py-1.5 hover:bg-slate-50 rounded-lg transition-colors px-1"
+                    >
+                      <div className="flex items-center gap-3 truncate">
+                        <input
+                          type="checkbox"
+                          checked={t.completed}
+                          onChange={() => onToggleTask(t.id)}
+                          className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 cursor-pointer"
+                        />
+                        <span className={`font-semibold truncate ${t.completed ? 'line-through text-slate-400' : 'text-slate-700'}`}>
+                          {t.title}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        {/* Priority Badge */}
+                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold ${
+                          t.priority === 'High'
+                            ? 'bg-rose-50 text-rose-500 border border-rose-100'
+                            : t.priority === 'Medium'
+                            ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                            : 'bg-blue-50 text-blue-500 border border-blue-100'
+                        }`}>
+                          {t.priority}
+                        </span>
+
+                        {/* Date badge */}
+                        <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1">
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                          </svg>
+                          {t.dueDate}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-100">
+                <button
+                  onClick={() => setCurrentRoute('tasks')}
+                  className="w-full py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-bold text-center transition-colors"
+                >
+                  + Add New Task
+                </button>
+              </div>
+            </div>
+
+            {/* 2. Site Progress */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                {/* Header */}
+                <div className="flex items-center justify-between pb-3">
+                  <h3 className="font-extrabold text-base text-slate-900">Site Progress</h3>
+                  <button
+                    onClick={onViewSiteProgress}
+                    className="text-xs font-bold text-slate-400 hover:text-slate-600"
+                  >
+                    Gallery
+                  </button>
+                </div>
+
+                {/* Construction Photo with Crane & Pill Badge */}
+                <div
+                  onClick={onViewSiteProgress}
+                  className="relative rounded-2xl overflow-hidden h-44 bg-slate-800 cursor-pointer group shadow-inner"
+                >
+                  <img
+                    src={skylineResidency.siteImage}
+                    alt="Site Progress"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                  
+                  {/* Bottom Pill Badge matching UI screenshot */}
+                  <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-white/20">
+                    <svg className="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                      <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                    <span>Latest Update • {skylineResidency.latestSiteUpdate}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
+                <span>Phase 2: Pillar casting in progress</span>
+                <span className="text-blue-600 font-semibold cursor-pointer" onClick={onViewSiteProgress}>Log Entry →</span>
+              </div>
+            </div>
+
+            {/* 3. Upcoming Milestones */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col justify-between">
+              <div>
+                {/* Header */}
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-600">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                      </svg>
+                    </span>
+                    <h3 className="font-extrabold text-base text-slate-900">Upcoming Milestones</h3>
+                  </div>
+                  <button
+                    onClick={() => setCurrentRoute('schedule')}
+                    className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                  >
+                    View All →
+                  </button>
+                </div>
+
+                {/* Vertical Timeline matching UI screenshot */}
+                <div className="mt-4 relative pl-6 space-y-5">
+                  {/* Vertical connecting line */}
+                  <div className="absolute left-2.5 top-2 bottom-3 w-0.5 bg-slate-200"></div>
+
+                  {/* Step 1: Foundation Completion (Active) */}
+                  <div className="relative">
+                    {/* Ring icon */}
+                    <div className="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-white border-4 border-blue-600 flex items-center justify-center">
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-extrabold text-slate-900">Foundation Completion</h4>
+                      <p className="text-[11px] font-medium text-slate-400">Nov 25, 2026</p>
+                    </div>
+                  </div>
+
+                  {/* Step 2: Structure Ready */}
+                  <div className="relative">
+                    <div className="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-white border-2 border-slate-300">
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-800">Structure Ready</h4>
+                      <p className="text-[11px] font-medium text-slate-400">Dec 10, 2026</p>
+                    </div>
+                  </div>
+
+                  {/* Step 3: Hand Over */}
+                  <div className="relative">
+                    <div className="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-white border-2 border-slate-300">
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-800">Hand Over</h4>
+                      <p className="text-[11px] font-medium text-slate-400">Mar 15, 2027</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                <span>Timeline Status:</span>
+                <span className="font-bold text-emerald-600">92% Confidence</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 2. PROJECTS LIST VIEW (SRS 4.1 Page 3)
+    // ==========================================
+    function ProjectsListView({ projects, onOpenNewProject, onSelectProject }) {
+      const [filterStatus, setFilterStatus] = useState('All');
+      const [filterType, setFilterType] = useState('All');
+
+      const filtered = projects.filter(p => {
+        const matchesStatus = filterStatus === 'All' || p.status === filterStatus;
+        const matchesType = filterType === 'All' || p.type === filterType;
+        return matchesStatus && matchesType;
+      });
+
+      return (
+        <div className="space-y-6 max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Projects Management</h2>
+              <p className="text-xs font-medium text-slate-500 mt-0.5">Manage, monitor, and track real estate developments</p>
+            </div>
+            <button
+              onClick={onOpenNewProject}
+              className="bg-brand-blue hover:bg-brand-blueHover text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md shadow-blue-500/25 flex items-center gap-2"
+            >
+              <svg className="w-4 h-4 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              <span>+ New Project</span>
+            </button>
+          </div>
+
+          {/* Filter Bar */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-400 uppercase">Status:</span>
+              {['All', 'In Progress', 'On Hold', 'Completed'].map(status => (
+                <button
+                  key={status}
+                  onClick={() => setFilterStatus(status)}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    filterStatus === status ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-400 uppercase">Type:</span>
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 px-3 py-1.5 outline-none"
+              >
+                <option value="All">All Types</option>
+                <option value="Residential">Residential</option>
+                <option value="Commercial">Commercial</option>
+                <option value="Plotted Layout">Plotted Layout</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Projects Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filtered.map(proj => (
+              <div
+                key={proj.id}
+                onClick={() => onSelectProject(proj.id)}
+                className="bg-white rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-lg transition-all overflow-hidden flex flex-col justify-between cursor-pointer group"
+              >
+                <div>
+                  {/* Card Cover Image */}
+                  <div className="h-44 relative bg-slate-900 overflow-hidden">
+                    <img
+                      src={proj.featuredImage}
+                      alt={proj.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+                    
+                    {/* Status Pill */}
+                    <div className="absolute top-3 right-3">
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm ${
+                        proj.status === 'In Progress' ? 'bg-emerald-500' :
+                        proj.status === 'On Hold' ? 'bg-amber-500' : 'bg-purple-600'
+                      }`}>
+                        {proj.statusDisplay || proj.status}
+                      </span>
+                    </div>
+
+                    <div className="absolute bottom-3 left-4 text-white">
+                      <p className="text-xs font-bold text-blue-300 uppercase tracking-wider">{proj.type}</p>
+                      <h3 className="text-lg font-extrabold leading-tight">{proj.name}</h3>
+                    </div>
+                  </div>
+
+                  {/* Body Content */}
+                  <div className="p-5 space-y-4">
+                    <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                      {proj.description}
+                    </p>
+
+                    {/* Progress Bar */}
+                    <div>
+                      <div className="flex items-center justify-between text-xs font-bold mb-1">
+                        <span className="text-slate-600">Completion</span>
+                        <span className="text-blue-600">{proj.progress}%</span>
+                      </div>
+                      <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-blue-600 h-full rounded-full transition-all duration-500"
+                          style={{ width: `${proj.progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    {/* Quick Stats Grid */}
+                    <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100 text-xs">
+                      <div>
+                        <span className="text-slate-400 block text-[10px] uppercase font-bold">Location</span>
+                        <span className="font-bold text-slate-800">{proj.location}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[10px] uppercase font-bold">Budget</span>
+                        <span className="font-bold text-slate-800">${(proj.budget / 1000000).toFixed(1)}M</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Action */}
+                <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-600 group-hover:text-blue-700">
+                  <span>View Project Details</span>
+                  <span>→</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 3. PROJECT DETAILS VIEW (SRS 4.1 Page 4)
+    // ==========================================
+    function ProjectDetailsView({ project, tasks, milestones, units, budgetCategories, expenses, documents, onToggleTask, onOpenBooking, onBack }) {
+      const [activeTab, setActiveTab] = useState('overview'); // overview, tasks, units, budget, documents
+
+      return (
+        <div className="space-y-6 max-w-7xl mx-auto">
+          {/* Back button & Hero Header */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onBack}
+              className="p-2 bg-white rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              ← Back
+            </button>
+            <div>
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-extrabold text-slate-900">{project.name}</h2>
+                <span className="bg-emerald-100 text-emerald-700 px-3 py-0.5 rounded-full text-xs font-bold">
+                  {project.statusDisplay || project.status}
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 font-medium mt-0.5 flex items-center gap-2">
+                <span>{project.location}</span>
+                <span>•</span>
+                <span>{project.type}</span>
+                <span>•</span>
+                <span>Manager: {project.manager}</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="flex items-center gap-2 border-b border-slate-200/80 pb-2">
+            {[
+              { id: 'overview', label: 'Overview' },
+              { id: 'tasks', label: `Tasks & Milestones (${tasks.length})` },
+              { id: 'units', label: `Units / Properties (${units.length})` },
+              { id: 'budget', label: 'Budget & Expenses' },
+              { id: 'documents', label: `Documents (${documents.length})` }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+                    : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* TAB 1: OVERVIEW */}
+          {activeTab === 'overview' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-6">
+                <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-base text-slate-900">Project Description</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">{project.description}</p>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-100 text-xs">
+                    <div>
+                      <span className="text-slate-400 block text-[10px] font-bold uppercase">Start Date</span>
+                      <span className="font-bold text-slate-800">{project.startDate}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px] font-bold uppercase">Expected Handover</span>
+                      <span className="font-bold text-slate-800">{project.endDate}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px] font-bold uppercase">Total Budget</span>
+                      <span className="font-bold text-slate-800">${(project.budget / 1000000).toFixed(2)}M</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px] font-bold uppercase">Progress</span>
+                      <span className="font-bold text-emerald-600">{project.progress}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Construction Progress Visuals */}
+                <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-base text-slate-900">Site Inspection & Progress Gallery</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="rounded-2xl overflow-hidden h-48 bg-slate-100 relative group">
+                      <img src={project.siteImage} alt="Site" className="w-full h-full object-cover" />
+                      <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-1 rounded">
+                        Latest Site Update • {project.latestSiteUpdate}
+                      </div>
+                    </div>
+                    <div className="rounded-2xl overflow-hidden h-48 bg-slate-100 relative group">
+                      <img src={project.featuredImage} alt="Render" className="w-full h-full object-cover" />
+                      <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-1 rounded">
+                        Architectural Rendering
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sidebar Info */}
+              <div className="space-y-6">
+                <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-base text-slate-900">Project Management Team</h3>
+                  <div className="space-y-3 text-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center">
+                        IS
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900">Irfan S</p>
+                        <p className="text-slate-500 text-[11px]">Lead Project Director</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center">
+                        SC
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900">Sarah Chen</p>
+                        <p className="text-slate-500 text-[11px]">Project Manager</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-amber-100 text-amber-700 font-bold flex items-center justify-center">
+                        RK
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900">Rajesh Kumar</p>
+                        <p className="text-slate-500 text-[11px]">Senior Site Engineer</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-base text-slate-900">Unit Inventory Status</h3>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between py-1 border-b border-slate-100">
+                      <span className="text-slate-500">Total Units:</span>
+                      <span className="font-bold text-slate-900">{project.unitsCount}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-100">
+                      <span className="text-slate-500">Units Sold:</span>
+                      <span className="font-bold text-emerald-600">{project.unitsSold}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-slate-100">
+                      <span className="text-slate-500">Units Booked:</span>
+                      <span className="font-bold text-blue-600">{project.unitsBooked}</span>
+                    </div>
+                    <div className="flex justify-between py-1">
+                      <span className="text-slate-500">Available:</span>
+                      <span className="font-bold text-purple-600">{project.unitsAvailable}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: TASKS & MILESTONES */}
+          {activeTab === 'tasks' && (
+            <div className="space-y-6">
+              <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <h3 className="font-extrabold text-base text-slate-900">Project Tasks</h3>
+                  <span className="text-xs font-bold text-slate-500">Click checkbox to complete</span>
+                </div>
+                <div className="divide-y divide-slate-100">
+                  {tasks.map(t => (
+                    <div key={t.id} className="py-3 flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={t.completed}
+                          onChange={() => onToggleTask(t.id)}
+                          className="w-5 h-5 rounded text-blue-600 cursor-pointer"
+                        />
+                        <div>
+                          <p className={`text-sm font-bold ${t.completed ? 'line-through text-slate-400' : 'text-slate-800'}`}>
+                            {t.title}
+                          </p>
+                          <p className="text-xs text-slate-400">Assignee: {t.assignee} • Milestone: {t.milestone}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                          t.priority === 'High' ? 'bg-rose-50 text-rose-600' :
+                          t.priority === 'Medium' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'
+                        }`}>
+                          {t.priority}
+                        </span>
+                        <span className="text-xs font-bold text-slate-500">{t.dueDate}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: UNITS */}
+          {activeTab === 'units' && (
+            <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="font-extrabold text-base text-slate-900">Project Units / Inventory</h3>
+                <span className="text-xs text-slate-500">FR-UNT-05: Non-available units cannot be booked</span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-slate-400 uppercase font-bold text-[10px]">
+                      <th className="py-3 px-3">Unit No</th>
+                      <th className="py-3 px-3">Type</th>
+                      <th className="py-3 px-3">Area (sq ft)</th>
+                      <th className="py-3 px-3">Floor</th>
+                      <th className="py-3 px-3">Price</th>
+                      <th className="py-3 px-3">Status</th>
+                      <th className="py-3 px-3 text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {units.map(u => (
+                      <tr key={u.id} className="hover:bg-slate-50">
+                        <td className="py-3.5 px-3 font-extrabold text-slate-900">{u.unitNo}</td>
+                        <td className="py-3.5 px-3 font-medium text-slate-600">{u.bhk || u.type}</td>
+                        <td className="py-3.5 px-3 font-medium text-slate-600">{u.area} sq ft</td>
+                        <td className="py-3.5 px-3 font-medium text-slate-600">Floor {u.floor}</td>
+                        <td className="py-3.5 px-3 font-bold text-slate-900">${u.price.toLocaleString()}</td>
+                        <td className="py-3.5 px-3">
+                          <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                            u.status === 'Available' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
+                            u.status === 'Booked' ? 'bg-blue-50 text-blue-600 border border-blue-200' :
+                            u.status === 'Sold' ? 'bg-purple-50 text-purple-600 border border-purple-200' :
+                            'bg-amber-50 text-amber-600 border border-amber-200'
+                          }`}>
+                            {u.status}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-3 text-right">
+                          {u.status === 'Available' ? (
+                            <button
+                              onClick={() => onOpenBooking(u)}
+                              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold"
+                            >
+                              Book Unit
+                            </button>
+                          ) : (
+                            <span className="text-slate-400 italic text-[11px]">
+                              {u.status === 'Booked' ? `Booked by ${u.bookedBy || 'Client'}` : 'Sold'}
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: BUDGET & EXPENSES */}
+          {activeTab === 'budget' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Categories */}
+                <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-base text-slate-900">Budget Breakdown by Category</h3>
+                  <div className="space-y-4">
+                    {budgetCategories.map(cat => {
+                      const pct = Math.round((cat.spent / cat.allocated) * 100);
+                      return (
+                        <div key={cat.id} className="space-y-1.5">
+                          <div className="flex justify-between text-xs font-bold">
+                            <span className="text-slate-800">{cat.name}</span>
+                            <span className="text-slate-500">${(cat.spent / 1000).toFixed(0)}k / ${(cat.allocated / 1000).toFixed(0)}k ({pct}%)</span>
+                          </div>
+                          <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${pct > 90 ? 'bg-rose-500' : pct > 70 ? 'bg-amber-500' : 'bg-blue-600'}`}
+                              style={{ width: `${pct}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Logged Expenses */}
+                <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+                  <h3 className="font-extrabold text-base text-slate-900">Recent Invoices & Expenses</h3>
+                  <div className="divide-y divide-slate-100">
+                    {expenses.map(exp => (
+                      <div key={exp.id} className="py-3 flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-extrabold text-slate-900">{exp.vendor}</p>
+                          <p className="text-[11px] text-slate-500">{exp.desc}</p>
+                          <span className="text-[10px] text-slate-400">{exp.date} • {exp.ref}</span>
+                        </div>
+                        <span className="text-sm font-extrabold text-slate-900">${exp.amount.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: DOCUMENTS */}
+          {activeTab === 'documents' && (
+            <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 className="font-extrabold text-base text-slate-900">Project Documents & Approvals</h3>
+                <button className="px-3.5 py-1.5 bg-blue-600 text-white rounded-xl text-xs font-bold">+ Upload Document</button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {documents.map(doc => (
+                  <div key={doc.id} className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center font-bold text-xs uppercase">
+                        {doc.ext}
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-900 truncate max-w-xs">{doc.title}</p>
+                        <p className="text-[11px] text-slate-400">{doc.category} • {doc.size} • Uploaded by {doc.uploader}</p>
+                      </div>
+                    </div>
+                    <button className="text-xs font-bold text-blue-600 hover:text-blue-700">Download</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 4. UNITS / INVENTORY VIEW (SRS 4.1 Page 5)
+    // ==========================================
+    function UnitsInventoryView({ units, projects, onOpenBooking }) {
+      const [filterStatus, setFilterStatus] = useState('All');
+      const [filterProject, setFilterProject] = useState('All');
+
+      const filtered = units.filter(u => {
+        const matchesStatus = filterStatus === 'All' || u.status === filterStatus;
+        const matchesProject = filterProject === 'All' || u.projectName === filterProject;
+        return matchesStatus && matchesProject;
+      });
+
+      return (
+        <div className="space-y-6 max-w-7xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Units & Property Inventory</h2>
+              <p className="text-xs font-medium text-slate-500 mt-0.5">Real-time availability, floor assignments, and pricing</p>
+            </div>
+          </div>
+
+          {/* Filter Bar */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-400 uppercase">Status:</span>
+              {['All', 'Available', 'Booked', 'Sold', 'Reserved'].map(status => (
+                <button
+                  key={status}
+                  onClick={() => setFilterStatus(status)}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                    filterStatus === status ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {status}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-400 uppercase">Project:</span>
+              <select
+                value={filterProject}
+                onChange={(e) => setFilterProject(e.target.value)}
+                className="bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 px-3 py-1.5 outline-none"
+              >
+                <option value="All">All Projects</option>
+                {projects.map(p => (
+                  <option key={p.id} value={p.name}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Units Table */}
+          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-400 uppercase font-bold text-[10px]">
+                    <th className="py-3.5 px-4">Unit No</th>
+                    <th className="py-3.5 px-4">Project</th>
+                    <th className="py-3.5 px-4">Type / Layout</th>
+                    <th className="py-3.5 px-4">Area</th>
+                    <th className="py-3.5 px-4">Floor</th>
+                    <th className="py-3.5 px-4">Facing</th>
+                    <th className="py-3.5 px-4">Price</th>
+                    <th className="py-3.5 px-4">Status</th>
+                    <th className="py-3.5 px-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filtered.map(u => (
+                    <tr key={u.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-4 px-4 font-extrabold text-slate-900">{u.unitNo}</td>
+                      <td className="py-4 px-4 font-bold text-blue-600">{u.projectName}</td>
+                      <td className="py-4 px-4 font-medium text-slate-700">{u.bhk || u.type}</td>
+                      <td className="py-4 px-4 font-medium text-slate-600">{u.area} sq ft</td>
+                      <td className="py-4 px-4 font-medium text-slate-600">Floor {u.floor}</td>
+                      <td className="py-4 px-4 font-medium text-slate-600">{u.facing}</td>
+                      <td className="py-4 px-4 font-extrabold text-slate-900">${u.price.toLocaleString()}</td>
+                      <td className="py-4 px-4">
+                        <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                          u.status === 'Available' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
+                          u.status === 'Booked' ? 'bg-blue-50 text-blue-600 border border-blue-200' :
+                          u.status === 'Sold' ? 'bg-purple-50 text-purple-600 border border-purple-200' :
+                          'bg-amber-50 text-amber-600 border border-amber-200'
+                        }`}>
+                          {u.status}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        {u.status === 'Available' ? (
+                          <button
+                            onClick={() => onOpenBooking(u)}
+                            className="px-3.5 py-1.5 bg-brand-blue hover:bg-brand-blueHover text-white rounded-xl text-xs font-bold transition-all shadow-xs"
+                          >
+                            Book Unit
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 italic text-[11px]">
+                            {u.status === 'Booked' ? `Reserved: ${u.bookedBy || 'Client'}` : 'Sold'}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 5. CLIENTS & LEADS VIEW (SRS 4.1 Page 6)
+    // ==========================================
+    function ClientsLeadsView({ clients, units, onOpenBookingWithClient }) {
+      const [viewMode, setViewMode] = useState('kanban'); // 'kanban' or 'list'
+
+      const stages = ['New', 'Contacted', 'Site Visit', 'Negotiation', 'Converted', 'Lost'];
+
+      return (
+        <div className="space-y-6 max-w-7xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Clients & Leads Pipeline</h2>
+              <p className="text-xs font-medium text-slate-500 mt-0.5">Track prospective buyers, manage follow-ups, and convert bookings</p>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setViewMode('kanban')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  viewMode === 'kanban' ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 border border-slate-200'
+                }`}
+              >
+                Kanban Board
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  viewMode === 'list' ? 'bg-blue-600 text-white' : 'bg-white text-slate-600 border border-slate-200'
+                }`}
+              >
+                Table List
+              </button>
+            </div>
+          </div>
+
+          {/* Kanban View */}
+          {viewMode === 'kanban' ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 overflow-x-auto pb-4">
+              {stages.map(stage => {
+                const stageClients = clients.filter(c => c.status === stage);
+                return (
+                  <div key={stage} className="bg-slate-100/80 rounded-2xl p-3 border border-slate-200/60 min-w-[200px] flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-200">
+                        <span className="font-extrabold text-xs text-slate-700">{stage}</span>
+                        <span className="bg-white text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-xs">
+                          {stageClients.length}
+                        </span>
+                      </div>
+
+                      <div className="space-y-2.5">
+                        {stageClients.map(client => (
+                          <div
+                            key={client.id}
+                            className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs hover:shadow-md transition-shadow"
+                          >
+                            <h4 className="font-bold text-xs text-slate-900">{client.name}</h4>
+                            <p className="text-[11px] text-slate-500 mt-0.5">{client.phone}</p>
+                            <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
+                              <span className="bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-semibold">{client.source}</span>
+                              <span className="text-blue-600 font-bold">{client.budget}</span>
+                            </div>
+                            {stage !== 'Converted' && (
+                              <button
+                                onClick={() => onOpenBookingWithClient(client)}
+                                className="w-full mt-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold text-[11px] rounded-lg transition-colors"
+                              >
+                                Create Booking →
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            /* Table View */
+            <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-400 uppercase font-bold text-[10px]">
+                    <th className="py-3.5 px-4">Name</th>
+                    <th className="py-3.5 px-4">Contact</th>
+                    <th className="py-3.5 px-4">Lead Status</th>
+                    <th className="py-3.5 px-4">Source</th>
+                    <th className="py-3.5 px-4">Budget</th>
+                    <th className="py-3.5 px-4">Assigned Agent</th>
+                    <th className="py-3.5 px-4">Next Follow Up</th>
+                    <th className="py-3.5 px-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {clients.map(c => (
+                    <tr key={c.id} className="hover:bg-slate-50">
+                      <td className="py-3.5 px-4 font-bold text-slate-900">{c.name}</td>
+                      <td className="py-3.5 px-4 text-slate-600">
+                        <div>{c.phone}</div>
+                        <div className="text-[11px] text-slate-400">{c.email}</div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                          c.status === 'Converted' ? 'bg-emerald-50 text-emerald-600' :
+                          c.status === 'Negotiation' ? 'bg-blue-50 text-blue-600' :
+                          c.status === 'Site Visit' ? 'bg-purple-50 text-purple-600' : 'bg-slate-100 text-slate-600'
+                        }`}>
+                          {c.status}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 font-medium text-slate-600">{c.source}</td>
+                      <td className="py-3.5 px-4 font-bold text-slate-800">{c.budget}</td>
+                      <td className="py-3.5 px-4 font-medium text-slate-600">{c.assignedTo}</td>
+                      <td className="py-3.5 px-4 font-medium text-slate-500">{c.nextFollowUp}</td>
+                      <td className="py-3.5 px-4 text-right">
+                        <button
+                          onClick={() => onOpenBookingWithClient(c)}
+                          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold"
+                        >
+                          Book Unit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 6. REPORTS VIEW (SRS 4.1 Page 7)
+    // ==========================================
+    function ReportsView({ projects, units, clients, expenses, budgetCategories }) {
+      const [reportType, setReportType] = useState('financial'); // 'financial', 'progress', 'sales'
+
+      const totalRevenue = units
+        .filter(u => u.status === 'Booked' || u.status === 'Sold')
+        .reduce((sum, u) => sum + u.price, 0);
+
+      const totalBudget = projects.reduce((sum, p) => sum + p.budget, 0);
+      const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+
+      const exportCSV = () => {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        if (reportType === 'financial') {
+          csvContent += "Category,Allocated Amount,Spent Amount,Utilization\n";
+          budgetCategories.forEach(b => {
+            csvContent += `"${b.name}",${b.allocated},${b.spent},${Math.round((b.spent/b.allocated)*100)}%\n`;
+          });
+        } else if (reportType === 'sales') {
+          csvContent += "Unit No,Project,Type,Price,Status\n";
+          units.forEach(u => {
+            csvContent += `"${u.unitNo}","${u.projectName}","${u.bhk || u.type}",${u.price},"${u.status}"\n`;
+          });
+        } else {
+          csvContent += "Project,Type,Location,Progress,Budget\n";
+          projects.forEach(p => {
+            csvContent += `"${p.name}","${p.type}","${p.location}",${p.progress}%,${p.budget}\n`;
+          });
+        }
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `BuildPro_${reportType}_report.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      };
+
+      return (
+        <div className="space-y-6 max-w-7xl mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Executive Reports & Analytics</h2>
+              <p className="text-xs font-medium text-slate-500 mt-0.5">Generate financial statements, sales conversions, and engineering progress audits</p>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <button
+                onClick={exportCSV}
+                className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl border border-slate-200 shadow-xs flex items-center gap-2"
+              >
+                <span>Export CSV</span>
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md shadow-blue-500/25 flex items-center gap-2"
+              >
+                <span>Print / PDF</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Report Type Selector */}
+          <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+            {[
+              { id: 'financial', label: 'Financial & Budget Report' },
+              { id: 'sales', label: 'Sales & Inventory Report' },
+              { id: 'progress', label: 'Construction Progress Report' }
+            ].map(r => (
+              <button
+                key={r.id}
+                onClick={() => setReportType(r.id)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  reportType === r.id ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:bg-white'
+                }`}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+
+          {/* FINANCIAL REPORT */}
+          {reportType === 'financial' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+                  <p className="text-xs font-bold text-slate-400 uppercase">Total Portfolio Budget</p>
+                  <p className="text-2xl font-extrabold text-slate-900 mt-1">${(totalBudget / 1000000).toFixed(2)}M</p>
+                </div>
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+                  <p className="text-xs font-bold text-slate-400 uppercase">Total Expenses Incurred</p>
+                  <p className="text-2xl font-extrabold text-slate-900 mt-1">${(totalExpenses / 1000).toFixed(1)}k</p>
+                </div>
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+                  <p className="text-xs font-bold text-slate-400 uppercase">Gross Sales Value</p>
+                  <p className="text-2xl font-extrabold text-emerald-600 mt-1">${(totalRevenue / 1000000).toFixed(2)}M</p>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs">
+                <h3 className="font-extrabold text-base text-slate-900 mb-4">Cost Variance by Category</h3>
+                <div className="divide-y divide-slate-100">
+                  {budgetCategories.map(b => (
+                    <div key={b.id} className="py-3 flex items-center justify-between text-xs">
+                      <div>
+                        <p className="font-bold text-slate-900">{b.name}</p>
+                        <p className="text-slate-400 text-[11px]">Allocated: ${b.allocated.toLocaleString()}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-slate-900">${b.spent.toLocaleString()}</p>
+                        <p className="text-[11px] text-emerald-600 font-semibold">{Math.round((b.spent/b.allocated)*100)}% utilized</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SALES REPORT */}
+          {reportType === 'sales' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+                  <p className="text-xs font-bold text-slate-400 uppercase">Total Units Booked/Sold</p>
+                  <p className="text-2xl font-extrabold text-blue-600 mt-1">
+                    {units.filter(u => u.status === 'Booked' || u.status === 'Sold').length} / {units.length}
+                  </p>
+                </div>
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+                  <p className="text-xs font-bold text-slate-400 uppercase">Lead Conversion Rate</p>
+                  <p className="text-2xl font-extrabold text-slate-900 mt-1">
+                    {Math.round((clients.filter(c => c.status === 'Converted').length / clients.length) * 100)}%
+                  </p>
+                </div>
+                <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+                  <p className="text-xs font-bold text-slate-400 uppercase">Realized Revenue</p>
+                  <p className="text-2xl font-extrabold text-emerald-600 mt-1">${(totalRevenue / 1000).toLocaleString()}k</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* PROGRESS REPORT */}
+          {reportType === 'progress' && (
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4">
+              <h3 className="font-extrabold text-base text-slate-900 mb-2">Projects Engineering Status</h3>
+              <div className="divide-y divide-slate-100">
+                {projects.map(p => (
+                  <div key={p.id} className="py-4 flex items-center justify-between gap-4">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900">{p.name}</h4>
+                      <p className="text-xs text-slate-500">{p.location} • {p.startDate} to {p.endDate}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="w-32 bg-slate-100 rounded-full h-2">
+                        <div className="bg-blue-600 h-full rounded-full" style={{ width: `${p.progress}%` }}></div>
+                      </div>
+                      <span className="font-bold text-xs text-slate-800">{p.progress}%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 7. SCHEDULE VIEW
+    // ==========================================
+    function ScheduleView({ milestones, tasks }) {
+      return (
+        <div className="space-y-6 max-w-7xl mx-auto">
+          <div>
+            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Project Timeline & Schedule</h2>
+            <p className="text-xs font-medium text-slate-500 mt-0.5">Key development milestones, critical path, and handover forecast</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-6">
+            <h3 className="font-extrabold text-base text-slate-900">Milestone Roadmap</h3>
+            <div className="space-y-4">
+              {milestones.map((m, idx) => (
+                <div key={m.id} className="p-4 rounded-2xl border border-slate-100 bg-slate-50 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <span className="w-8 h-8 rounded-full bg-blue-600 text-white font-extrabold flex items-center justify-center text-xs">
+                      {idx + 1}
+                    </span>
+                    <div>
+                      <h4 className="font-bold text-sm text-slate-900">{m.title}</h4>
+                      <p className="text-xs text-slate-500">Target Date: {m.dueDate}</p>
+                    </div>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    m.status === 'In Progress' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-200 text-slate-600'
+                  }`}>
+                    {m.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 8. TEAM VIEW
+    // ==========================================
+    function TeamView() {
+      const team = [
+        { name: "Irfan S", role: "Admin / Project Director", email: "irfan@buildpro.com", phone: "+91 98765 43210", projects: "Skyline Residency, Ocean Crest" },
+        { name: "Sarah Chen", role: "Senior Project Manager", email: "sarah.chen@buildpro.com", phone: "+91 98765 43211", projects: "Green Valley Villas, Metro Business Park" },
+        { name: "Marcus Vance", role: "Lead Sales Executive", email: "marcus.v@buildpro.com", phone: "+91 98765 43212", projects: "All Projects" },
+        { name: "Rajesh Kumar", role: "Site Engineer", email: "rajesh.k@buildpro.com", phone: "+91 98765 43213", projects: "Skyline Residency" }
+      ];
+
+      return (
+        <div className="space-y-6 max-w-7xl mx-auto">
+          <div>
+            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Team & Personnel</h2>
+            <p className="text-xs font-medium text-slate-500 mt-0.5">Role-based access permissions and project assignments</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {team.map((member, i) => (
+              <div key={i} className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-xs flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-sky-400 text-white font-extrabold text-lg flex items-center justify-center shrink-0">
+                  {member.name.split(' ').map(n=>n[0]).join('')}
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-sm text-slate-900">{member.name}</h4>
+                  <p className="text-xs font-bold text-blue-600">{member.role}</p>
+                  <p className="text-[11px] text-slate-400 mt-1">{member.email} • {member.phone}</p>
+                  <p className="text-[11px] text-slate-600 mt-0.5 font-medium">Assigned: {member.projects}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 9. SETTINGS VIEW
+    // ==========================================
+    function SettingsView() {
+      return (
+        <div className="space-y-6 max-w-4xl mx-auto">
+          <div>
+            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">System & Account Settings</h2>
+            <p className="text-xs font-medium text-slate-500 mt-0.5">Manage organization configuration and API integrations</p>
+          </div>
+
+          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-5">
+            <h3 className="font-extrabold text-base text-slate-900">Organization Profile</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Company Name</label>
+                <input type="text" readOnly value="BuildPro Real Estate Developers Ltd" className="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl font-medium" />
+              </div>
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">HQ Location</label>
+                <input type="text" readOnly value="Coimbatore, Tamil Nadu, India" className="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl font-medium" />
+              </div>
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Backend REST API</label>
+                <input type="text" readOnly value="http://localhost:8000/api/" className="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl font-medium" />
+              </div>
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Database Engine</label>
+                <input type="text" readOnly value="PostgreSQL 14 (SQLite Dev)" className="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl font-medium" />
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ==========================================
+    // 10. MODALS: NEW PROJECT, BOOKING, GALLERY
+    // ==========================================
+    function NewProjectModal({ onClose, onSubmit }) {
+      const [formData, setFormData] = useState({
+        name: '',
+        location: '',
+        type: 'Residential',
+        description: '',
+        budget: '5000000',
+        unitsCount: '40',
+        startDate: '2026-11-20',
+        endDate: '2027-12-31'
+      });
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!formData.name || !formData.location) return;
+        onSubmit(formData);
+      };
+
+      return (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="font-extrabold text-lg text-slate-900">+ Create New Project</h3>
+              <button onClick={onClose} className="text-slate-400 hover:text-slate-600 font-bold text-lg">×</button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Project Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Royal Palms Residency"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full border border-slate-200 rounded-xl p-2.5 focus:border-blue-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Location *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Coimbatore"
+                    value={formData.location}
+                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                    className="w-full border border-slate-200 rounded-xl p-2.5 focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Project Type</label>
+                  <select
+                    value={formData.type}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    className="w-full border border-slate-200 rounded-xl p-2.5 focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="Residential">Residential</option>
+                    <option value="Commercial">Commercial</option>
+                    <option value="Plotted Layout">Plotted Layout</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Budget ($)</label>
+                  <input
+                    type="number"
+                    value={formData.budget}
+                    onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+                    className="w-full border border-slate-200 rounded-xl p-2.5 focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Total Planned Units</label>
+                  <input
+                    type="number"
+                    value={formData.unitsCount}
+                    onChange={(e) => setFormData({ ...formData, unitsCount: e.target.value })}
+                    className="w-full border border-slate-200 rounded-xl p-2.5 focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Description</label>
+                <textarea
+                  rows="2"
+                  placeholder="Overview of the development..."
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full border border-slate-200 rounded-xl p-2.5 focus:border-blue-500 focus:outline-none"
+                ></textarea>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md shadow-blue-500/25"
+                >
+                  Create Project
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    function BookingModal({ targetUnit, availableUnits, clients, onClose, onSubmit }) {
+      const [selectedUnitId, setSelectedUnitId] = useState(targetUnit ? targetUnit.id : (availableUnits[0]?.id || ''));
+      const [selectedClientId, setSelectedClientId] = useState(clients[0]?.id || '');
+      const [bookingAmount, setBookingAmount] = useState('25000');
+      const [bookingDate, setBookingDate] = useState('2026-11-20');
+
+      const selectedUnit = availableUnits.find(u => u.id === parseInt(selectedUnitId)) || targetUnit;
+      const selectedClient = clients.find(c => c.id === parseInt(selectedClientId));
+
+      const handleConfirm = (e) => {
+        e.preventDefault();
+        if (!selectedUnit || !selectedClient) return;
+        onSubmit({
+          unitId: selectedUnit.id,
+          unitNo: selectedUnit.unitNo,
+          clientId: selectedClient.id,
+          clientName: selectedClient.name,
+          amount: bookingAmount,
+          date: bookingDate
+        });
+      };
+
+      return (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="font-extrabold text-lg text-slate-900">Book Property Unit</h3>
+              <button onClick={onClose} className="text-slate-400 hover:text-slate-600 font-bold text-lg">×</button>
+            </div>
+
+            <form onSubmit={handleConfirm} className="space-y-4 text-xs">
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Select Unit (Available Only)</label>
+                <select
+                  value={selectedUnitId}
+                  onChange={(e) => setSelectedUnitId(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl p-2.5 font-semibold focus:border-blue-500 focus:outline-none"
+                >
+                  {targetUnit && <option value={targetUnit.id}>{targetUnit.unitNo} ({targetUnit.projectName}) - ${targetUnit.price.toLocaleString()}</option>}
+                  {availableUnits.filter(u => !targetUnit || u.id !== targetUnit.id).map(u => (
+                    <option key={u.id} value={u.id}>
+                      {u.unitNo} - {u.projectName} ({u.bhk || u.type}) - ${u.price.toLocaleString()}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 block mb-1">Assign Client / Lead</label>
+                <select
+                  value={selectedClientId}
+                  onChange={(e) => setSelectedClientId(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl p-2.5 font-semibold focus:border-blue-500 focus:outline-none"
+                >
+                  {clients.map(c => (
+                    <option key={c.id} value={c.id}>{c.name} ({c.phone}) - {c.status}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Token Booking Amount ($)</label>
+                  <input
+                    type="number"
+                    value={bookingAmount}
+                    onChange={(e) => setBookingAmount(e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl p-2.5 focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700 block mb-1">Booking Date</label>
+                  <input
+                    type="date"
+                    value={bookingDate}
+                    onChange={(e) => setBookingDate(e.target.value)}
+                    className="w-full border border-slate-200 rounded-xl p-2.5 focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 bg-blue-50 rounded-xl text-[11px] text-blue-700 font-medium">
+                Note: Conforming this booking will automatically set the Unit status to <strong>Booked</strong> and update the Lead status to <strong>Converted</strong>.
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-md shadow-blue-500/25"
+                >
+                  Confirm Booking
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    function SiteProgressModal({ project, onClose }) {
+      return (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div>
+                <h3 className="font-extrabold text-lg text-slate-900">{project.name} - Site Progress Audit</h3>
+                <p className="text-xs text-slate-500">Inspection Logged: {project.latestSiteUpdate}</p>
+              </div>
+              <button onClick={onClose} className="text-slate-400 hover:text-slate-600 font-bold text-lg">×</button>
+            </div>
+
+            <div className="rounded-2xl overflow-hidden h-72 bg-slate-900 relative">
+              <img src={project.siteImage} alt="Site" className="w-full h-full object-cover" />
+              <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md text-white text-xs px-3 py-1.5 rounded-lg border border-white/20">
+                Tower A - 5th Floor Slab Rebar & Shuttering
+              </div>
+            </div>
+
+            <div className="space-y-2 text-xs">
+              <h4 className="font-extrabold text-slate-900">Engineer's Field Notes</h4>
+              <p className="text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
+                Concrete casting completed for Level 4 columns on Nov 20, 2026. Cube test results show 38.5 N/mm² at 14 days, exceeding design specifications. Structural crane maintenance verified. Ready for Level 5 framework.
+              </p>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={onClose}
+                className="px-5 py-2 bg-slate-900 text-white rounded-xl font-bold text-xs"
+              >
+                Close Gallery
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Render the React App
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
